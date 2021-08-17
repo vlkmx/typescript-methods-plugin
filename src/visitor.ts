@@ -38,7 +38,7 @@ export interface MethodsPluginConfig extends ClientSideBasePluginConfig {
 // > {
 export class MethodsVisitor {
   // private _externalImportPrefix: string
-  private typeImportsPath = "./types.generated.ts"
+  private typeImportsPath = "./types.generated"
   private imports = new Set<string>()
   // private _documents: Types.DocumentFile[]
   private mutations = new Set<string>()
@@ -109,7 +109,7 @@ export class MethodsVisitor {
       .reduce((acc, x) => [...acc, ...x], [])
 
     return `
-      import { ApolloClient } from '@apollo/client';
+      import { ApolloClient, NormalizedCache } from '@apollo/client';
       import {
         ${imports.join(",\n")}
       } from '${this.typeImportsPath}';\n
@@ -129,18 +129,17 @@ export class MethodsVisitor {
             mutation: ${name}Document,
             variables,
         });
-  }\n
-  `
+    }`
     }
     let base = `
         class GQLMethods {
-            private client: ApolloClient;
+            private client: ApolloClient<NormalizedCache>;
 
-            constructor(client: ApolloClient) {
+            constructor(client: ApolloClient<NormalizedCache>) {
                 this.client = client;
             }
 
-            ${mutations.map(toMutation)}
+            ${mutations.map(toMutation).join("\n")}
         }
       
       `

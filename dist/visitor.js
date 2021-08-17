@@ -19,7 +19,7 @@ var MethodsVisitor = /** @class */ (function () {
         var _this = this;
         this.rawConfig = rawConfig;
         // private _externalImportPrefix: string
-        this.typeImportsPath = "./types.generated.ts";
+        this.typeImportsPath = "./types.generated";
         this.imports = new Set();
         // private _documents: Types.DocumentFile[]
         this.mutations = new Set();
@@ -59,15 +59,15 @@ var MethodsVisitor = /** @class */ (function () {
                 .concat(mutationsImports)
                 .concat(subscriptionsImports)
                 .reduce(function (acc, x) { return __spreadArray(__spreadArray([], acc), x); }, []);
-            return "\n      import { ApolloClient } from '@apollo/client';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
+            return "\n      import { ApolloClient, NormalizedCache } from '@apollo/client';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
         };
         this.getBaseClass = function () {
             var mutations = Array.from(_this.mutations);
             var toMutation = function (name) {
                 name = change_case_all_1.pascalCase(name);
-                return "\n      mutate" + name + " = async (variables: " + name + "MutationVariables) => {\n        return this.client.mutate<\n          " + name + "Mutation,\n          " + name + "MutationVariables\n          >({\n            mutation: " + name + "Document,\n            variables,\n        });\n  }\n\n  ";
+                return "\n      mutate" + name + " = async (variables: " + name + "MutationVariables) => {\n        return this.client.mutate<\n          " + name + "Mutation,\n          " + name + "MutationVariables\n          >({\n            mutation: " + name + "Document,\n            variables,\n        });\n    }";
             };
-            var base = "\n        class GQLMethods {\n            private client: ApolloClient;\n\n            constructor(client: ApolloClient) {\n                this.client = client;\n            }\n\n            " + mutations.map(toMutation) + "\n        }\n      \n      ";
+            var base = "\n        class GQLMethods {\n            private client: ApolloClient<NormalizedCache>;\n\n            constructor(client: ApolloClient<NormalizedCache>) {\n                this.client = client;\n            }\n\n            " + mutations.map(toMutation).join("\n") + "\n        }\n      \n      ";
             return base;
         };
         // public getImports = (): string[] => {
