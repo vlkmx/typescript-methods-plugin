@@ -45,6 +45,8 @@ export const plugin: PluginFunction<
   const visitor = new MethodsVisitor(schema, allFragments, config, documents)
   const visitorResult = visit(allAst, { leave: visitor })
 
+  console.log("@@ INDE", visitor.output(), visitor.getBaseClass())
+
   return {
     // prepend: visitor.getImports(),
     content: [

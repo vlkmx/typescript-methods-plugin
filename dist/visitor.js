@@ -11,7 +11,6 @@ var GROUPED_APOLLO_CLIENT_3_IDENTIFIER = "Apollo";
 // > {
 var MethodsVisitor = /** @class */ (function () {
     function MethodsVisitor(schema, fragments, rawConfig, documents) {
-        // super(schema, fragments, rawConfig, {})
         var _this = this;
         this.rawConfig = rawConfig;
         // private _externalImportPrefix: string
@@ -93,11 +92,15 @@ var MethodsVisitor = /** @class */ (function () {
         this.output = function () {
             return _this.getBaseClass();
         };
+        // super(schema, fragments, rawConfig, {})
         // this._externalImportPrefix = this.config.importOperationTypesFrom
         //   ? `${this.config.importOperationTypesFrom}.`
         //   : ""
         // this._documents = documents
-        console.log("@@ VISITOR", documents.map(function (x) { var _a; return (_a = x.document) === null || _a === void 0 ? void 0 : _a.definitions; }));
+        // console.log(
+        //   "@@ VISITOR",
+        //   documents.map((x) => x.document?.definitions)
+        // )
     }
     MethodsVisitor.prototype.getOmitDeclaration = function () {
         return visitor_plugin_common_1.OMIT_TYPE;

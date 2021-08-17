@@ -13,7 +13,7 @@ export declare class MethodsVisitor {
     private getImportStatement;
     private getReactImport;
     private getOmitDeclaration;
-    private getBaseClass;
+    getBaseClass: () => string;
     protected buildOperation: (node: OperationDefinitionNode, documentVariableName: string, operationType: string, operationResultType: string, operationVariablesTypes: string, hasRequiredVariables: boolean) => string;
     OperationDefinition(node: OperationDefinitionNode): string;
     output: () => string;

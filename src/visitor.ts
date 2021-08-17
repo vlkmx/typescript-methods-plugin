@@ -51,15 +51,14 @@ export class MethodsVisitor {
     documents: Types.DocumentFile[]
   ) {
     // super(schema, fragments, rawConfig, {})
-
     // this._externalImportPrefix = this.config.importOperationTypesFrom
     //   ? `${this.config.importOperationTypesFrom}.`
     //   : ""
     // this._documents = documents
-    console.log(
-      "@@ VISITOR",
-      documents.map((x) => x.document?.definitions)
-    )
+    // console.log(
+    //   "@@ VISITOR",
+    //   documents.map((x) => x.document?.definitions)
+    // )
   }
 
   private getImportStatement = (isTypeImport: boolean): string => {
@@ -83,7 +82,7 @@ export class MethodsVisitor {
   //     : documentVariableName
   // }
 
-  private getBaseClass = () => {
+  getBaseClass = () => {
     let mutations: { name: string }[] = []
     let toMutation = (name: string) => {
       name = pascalCase(name)
