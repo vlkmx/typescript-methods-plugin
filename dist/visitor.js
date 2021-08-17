@@ -89,6 +89,24 @@ var MethodsVisitor = /** @class */ (function () {
                 .filter(Boolean)
                 .join("\n");
         };
+        this.OperationDefinition = function (node) {
+            var _a;
+            var name = (_a = node.name) === null || _a === void 0 ? void 0 : _a.value;
+            if (!name) {
+                return "";
+            }
+            console.log("@@ope", _this.queries, _this.mutations);
+            if (node.operation === "query") {
+                _this.queries.add(name);
+            }
+            else if (node.operation === "mutation") {
+                _this.mutations.add(name);
+            }
+            if (node.operation === "subscription") {
+                _this.subscriptions.add(name);
+            }
+            return "";
+        };
         this.output = function () {
             return _this.getBaseClass();
         };
@@ -101,30 +119,12 @@ var MethodsVisitor = /** @class */ (function () {
         //   "@@ VISITOR",
         //   documents.map((x) => x.document?.definitions)
         // )
-        this.mutations = new Set();
-        this.subscriptions = new Set();
-        this.queries = new Set();
+        // this.mutations = new Set<string>()
+        // this.subscriptions = new Set<string>()
+        // this.queries = new Set<string>()
     }
     MethodsVisitor.prototype.getOmitDeclaration = function () {
         return visitor_plugin_common_1.OMIT_TYPE;
-    };
-    MethodsVisitor.prototype.OperationDefinition = function (node) {
-        var _a;
-        var name = (_a = node.name) === null || _a === void 0 ? void 0 : _a.value;
-        if (!name) {
-            return "";
-        }
-        console.log("@@ope", this.queries, this.mutations);
-        if (node.operation === "query") {
-            this.queries.add(name);
-        }
-        else if (node.operation === "mutation") {
-            this.mutations.add(name);
-        }
-        if (node.operation === "subscription") {
-            this.subscriptions.add(name);
-        }
-        return "";
     };
     return MethodsVisitor;
 }());
