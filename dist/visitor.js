@@ -59,10 +59,7 @@ var MethodsVisitor = /** @class */ (function () {
                 .concat(mutationsImports)
                 .concat(subscriptionsImports)
                 .reduce(function (acc, x) { return __spreadArray(__spreadArray([], acc), x); }, []);
-            return [
-                "import { ApolloClient } from '@apollo/client';",
-                "import {\n        " + imports.join("\n") + "\n      } from '" + _this.typeImportsPath + "';",
-            ];
+            return "\n      import { ApolloClient } from '@apollo/client';\n      import {\n        " + imports.join("\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
         };
         this.getBaseClass = function () {
             var mutations = Array.from(_this.mutations);

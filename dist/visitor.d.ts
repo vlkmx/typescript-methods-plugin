@@ -14,7 +14,7 @@ export declare class MethodsVisitor {
     private getImportStatement;
     private getReactImport;
     private getOmitDeclaration;
-    getImports: () => string[];
+    getImports: () => string;
     getBaseClass: () => string;
     protected buildOperation: (node: OperationDefinitionNode, documentVariableName: string, operationType: string, operationResultType: string, operationVariablesTypes: string, hasRequiredVariables: boolean) => string;
     OperationDefinition: (node: OperationDefinitionNode) => string;

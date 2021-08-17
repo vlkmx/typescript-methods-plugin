@@ -108,12 +108,12 @@ export class MethodsVisitor {
       .concat(subscriptionsImports)
       .reduce((acc, x) => [...acc, ...x], [])
 
-    return [
-      `import { ApolloClient } from '@apollo/client';`,
-      `import {
+    return `
+      import { ApolloClient } from '@apollo/client';
+      import {
         ${imports.join("\n")}
-      } from '${this.typeImportsPath}';`,
-    ]
+      } from '${this.typeImportsPath}';\n
+      `
   }
 
   getBaseClass = () => {
