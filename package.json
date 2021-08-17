@@ -1,0 +1,38 @@
+{
+  "name": "graphql-typescript-methods",
+  "version": "0.0.1",
+  "description": "GraphQL Code Generator plugin for generating mutations and subscriptions",
+  "license": "MIT",
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "test": "node ./node_modules/jest/bin/jest.js --no-watchman --passWithNoTests --forceExit",
+    "ts": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@graphql-codegen/plugin-helpers": "^1.18.8",
+    "@graphql-codegen/visitor-plugin-common": "^1.18",
+    "change-case-all": "1.0.14",
+    "graphql-tag": "^2.0.0",
+    "typescript": "^4.3.5"
+  },
+  "peerDependencies": {
+    "graphql": "^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0",
+    "graphql-tag": "^2.0.0"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "publishConfig": {
+    "directory": "dist",
+    "access": "public"
+  },
+  "author": "",
+  "devDependencies": {
+    "@types/jest": "^26.0.24",
+    "@types/node": "^16.4.3",
+    "jest": "^27.0.6"
+  }
+}
