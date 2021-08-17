@@ -87,21 +87,23 @@ export class MethodsVisitor {
   // }
 
   getImports = () => {
-    let queriesImports = Array.from(this.queries).map((name) => [
+    let queriesImports = Array.from(this.queries).map(({ name }) => [
       `${name}Query`,
       `${name}QueryVariables`,
       `${name}Document`,
     ])
-    let mutationsImports = Array.from(this.mutations).map((name) => [
+    let mutationsImports = Array.from(this.mutations).map(({ name }) => [
       `${name}Mutation`,
       `${name}MutationVariables`,
       `${name}Document`,
     ])
-    let subscriptionsImports = Array.from(this.subscriptions).map((name) => [
-      `${name}Subscription`,
-      `${name}SubscriptionVariables`,
-      `${name}Document`,
-    ])
+    let subscriptionsImports = Array.from(this.subscriptions).map(
+      ({ name }) => [
+        `${name}Subscription`,
+        `${name}SubscriptionVariables`,
+        `${name}Document`,
+      ]
+    )
 
     let imports = queriesImports
       .concat(mutationsImports)

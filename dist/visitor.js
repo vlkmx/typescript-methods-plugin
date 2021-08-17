@@ -40,21 +40,30 @@ var MethodsVisitor = /** @class */ (function () {
         //     : documentVariableName
         // }
         this.getImports = function () {
-            var queriesImports = Array.from(_this.queries).map(function (name) { return [
-                name + "Query",
-                name + "QueryVariables",
-                name + "Document",
-            ]; });
-            var mutationsImports = Array.from(_this.mutations).map(function (name) { return [
-                name + "Mutation",
-                name + "MutationVariables",
-                name + "Document",
-            ]; });
-            var subscriptionsImports = Array.from(_this.subscriptions).map(function (name) { return [
-                name + "Subscription",
-                name + "SubscriptionVariables",
-                name + "Document",
-            ]; });
+            var queriesImports = Array.from(_this.queries).map(function (_a) {
+                var name = _a.name;
+                return [
+                    name + "Query",
+                    name + "QueryVariables",
+                    name + "Document",
+                ];
+            });
+            var mutationsImports = Array.from(_this.mutations).map(function (_a) {
+                var name = _a.name;
+                return [
+                    name + "Mutation",
+                    name + "MutationVariables",
+                    name + "Document",
+                ];
+            });
+            var subscriptionsImports = Array.from(_this.subscriptions).map(function (_a) {
+                var name = _a.name;
+                return [
+                    name + "Subscription",
+                    name + "SubscriptionVariables",
+                    name + "Document",
+                ];
+            });
             var imports = queriesImports
                 .concat(mutationsImports)
                 .concat(subscriptionsImports)
