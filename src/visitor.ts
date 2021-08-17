@@ -1,92 +1,12 @@
-import {
-  ClientSideBaseVisitor,
-  ClientSideBasePluginConfig,
-  getConfigValue,
-  LoadedFragment,
-  OMIT_TYPE,
-  DocumentMode,
-} from "@graphql-codegen/visitor-plugin-common"
-import { OperationDefinitionNode, Kind, GraphQLSchema } from "graphql"
-import { Types } from "@graphql-codegen/plugin-helpers"
+import { OperationDefinitionNode } from "graphql"
 import { pascalCase } from "change-case-all"
-import { camelCase } from "change-case-all"
-
-const APOLLO_CLIENT_3_UNIFIED_PACKAGE = `@apollo/client`
-const GROUPED_APOLLO_CLIENT_3_IDENTIFIER = "Apollo"
 
 type OperationType = "query" | "mutation" | "subscription"
-
-export interface MethodsPluginConfig extends ClientSideBasePluginConfig {
-  //   withComponent: boolean
-  //   withHOC: boolean
-  //   withHooks: boolean
-  //   withMutationFn: boolean
-  //   withRefetchFn: boolean
-  //   apolloReactCommonImportFrom: string
-  //   apolloReactComponentsImportFrom: string
-  //   apolloReactHocImportFrom: string
-  //   apolloReactHooksImportFrom: string
-  //   componentSuffix: string
-  //   reactApolloVersion: 2 | 3
-  //   withResultType: boolean
-  //   withMutationOptionsType: boolean
-  //   addDocBlocks: boolean
-  //   defaultBaseOptions: { [key: string]: string }
-}
-
-// export class MethodsVisitor extends ClientSideBaseVisitor<
-//   {},
-//   MethodsPluginConfig
-// > {
 export class MethodsVisitor {
-  // private _externalImportPrefix: string
   private typeImportsPath = "./types.generated"
-  private imports = new Set<string>()
-  // private _documents: Types.DocumentFile[]
   private mutations = new Set<{ name: string; hasVariables: boolean }>()
   private subscriptions = new Set<{ name: string; hasVariables: boolean }>()
   private queries = new Set<{ name: string; hasVariables: boolean }>()
-
-  constructor(
-    schema: GraphQLSchema,
-    fragments: LoadedFragment[],
-    protected rawConfig: MethodsPluginConfig,
-    documents: Types.DocumentFile[]
-  ) {
-    // super(schema, fragments, rawConfig, {})
-    // this._externalImportPrefix = this.config.importOperationTypesFrom
-    //   ? `${this.config.importOperationTypesFrom}.`
-    //   : ""
-    // this._documents = documents
-    // console.log(
-    //   "@@ VISITOR",
-    //   documents.map((x) => x.document?.definitions)
-    // )
-    // this.mutations = new Set<string>()
-    // this.subscriptions = new Set<string>()
-    // this.queries = new Set<string>()
-  }
-
-  private getImportStatement = (isTypeImport: boolean): string => {
-    return isTypeImport ? "import type" : "import"
-  }
-
-  private getReactImport = (): string => {
-    return `import * as React from 'react';`
-  }
-
-  private getOmitDeclaration(): string {
-    return OMIT_TYPE
-  }
-
-  // private getDocumentNodeVariable = (
-  //   node: OperationDefinitionNode,
-  //   documentVariableName: string
-  // ): string => {
-  //   return this.config.documentMode === DocumentMode.external
-  //     ? `Operations.${node.name?.value ?? ""}`
-  //     : documentVariableName
-  // }
 
   getImports = () => {
     let queriesImports = Array.from(this.queries).map(({ name }) => [
@@ -125,15 +45,11 @@ export class MethodsVisitor {
     let mutations = Array.from(this.mutations)
     let subscriptions = Array.from(this.subscriptions)
     let base = `
-        export class GQLClient extends ApolloClient<NormalizedCacheObject>{
-
-            ${queries.map(this.toQuery).join("\n")}
-
-            ${mutations.map(this.toMutation).join("\n")}
-
-            ${subscriptions.map(this.toSubscription).join("\n")}
-        }
-      
+  export class GQLClient extends ApolloClient<NormalizedCacheObject>{
+    ${queries.map(this.toQuery).join("\n")}
+    ${mutations.map(this.toMutation).join("\n")}
+    ${subscriptions.map(this.toSubscription).join("\n")}
+  }      
       `
 
     return base
@@ -154,14 +70,14 @@ export class MethodsVisitor {
     })
 
     return `
-    mutate${name} = ${paramsDeclaration} => {
-      return this.mutate<
-        ${name}Mutation,
-        ${name}MutationVariables
-        >({
-          mutation: ${name}Document,
-          ${this.getVarsAndOptions(hasVariables)}
-      });
+  mutate${name} = ${paramsDeclaration} => {
+    return this.mutate<
+      ${name}Mutation,
+      ${name}MutationVariables
+      >({
+        mutation: ${name}Document,
+        ${this.getVarsAndOptions(hasVariables)}
+    });
   }`
   }
 
@@ -179,14 +95,14 @@ export class MethodsVisitor {
       type: "query",
     })
     return `
-    query${name} = ${paramsDeclaration} => {
-      return this.query<
-        ${name}Query,
-        ${name}QueryVariables
-        >({
-          query: ${name}Document,
-          ${this.getVarsAndOptions(hasVariables)}
-      });
+  query${name} = ${paramsDeclaration} => {
+    return this.query<
+      ${name}Query,
+      ${name}QueryVariables
+      >({
+        query: ${name}Document,
+        ${this.getVarsAndOptions(hasVariables)}
+    });
   }`
   }
 
@@ -204,26 +120,22 @@ export class MethodsVisitor {
       type: "subscription",
     })
     return `
-    subscribe${name} = ${paramsDeclaration} => {
-      return this.subscribe<
-        ${name}Subscription,
-        ${name}SubscriptionVariables
-        >({
-          query: ${name}Document,
-          ${this.getVarsAndOptions(hasVariables)}
-      });
+  subscribe${name} = ${paramsDeclaration} => {
+    return this.subscribe<
+      ${name}Subscription,
+      ${name}SubscriptionVariables
+      >({
+        query: ${name}Document,
+        ${this.getVarsAndOptions(hasVariables)}
+    });
   }`
   }
 
   private getVarsAndOptions = (hasVariables: boolean) => {
     return hasVariables
-      ? `
-      variables,
-      ...options
-    `
-      : `
-      ...options
-    `
+      ? `variables,
+      ...options`
+      : `...options`
   }
 
   private getParamsDeclaration = (ops: {
@@ -242,8 +154,8 @@ export class MethodsVisitor {
   private getRequestOptions = (type?: OperationType) => {
     let isMutation = type && type === "mutation"
     return isMutation
-      ? `options?: {fetchPolicy: 'network-only' | 'no-cache'}`
-      : `options?: {fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only'}`
+      ? `options?: { fetchPolicy: 'network-only' | 'no-cache' }`
+      : `options?: { fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only' }`
   }
 
   private getOperationName = (type: OperationType) => {
@@ -254,67 +166,6 @@ export class MethodsVisitor {
     } else {
       return "Subscription"
     }
-  }
-
-  // public getImports = (): string[] => {
-  //   const baseImports = super.getImports()
-  //   const hasOperations = this._collectedOperations.length > 0
-
-  //   if (!hasOperations) {
-  //     return baseImports
-  //   }
-
-  //   return [...baseImports, ...Array.from(this.imports)]
-  // }
-
-  //   private _buildResultType(
-  //     node: OperationDefinitionNode,
-  //     operationType: string,
-  //     operationResultType: string,
-  //     operationVariablesTypes: string
-  //   ): string {
-  //     const componentResultType = this.convertName(node.name?.value ?? "", {
-  //       suffix: `${operationType}Result`,
-  //       useTypesPrefix: false,
-  //     })
-
-  //     switch (node.operation) {
-  //       case "query":
-  //         this.imports.add(this.getApolloReactCommonImport(true))
-  //         return `export type ${componentResultType} = ${this.getApolloReactCommonIdentifier()}.QueryResult<${operationResultType}, ${operationVariablesTypes}>;`
-  //       case "mutation":
-  //         this.imports.add(this.getApolloReactCommonImport(true))
-  //         return `export type ${componentResultType} = ${this.getApolloReactCommonIdentifier()}.MutationResult<${operationResultType}>;`
-  //       case "subscription":
-  //         this.imports.add(this.getApolloReactCommonImport(true))
-  //         return `export type ${componentResultType} = ${this.getApolloReactCommonIdentifier()}.SubscriptionResult<${operationResultType}>;`
-  //       default:
-  //         return ""
-  //     }
-  //   }
-
-  protected buildOperation = (
-    node: OperationDefinitionNode,
-    documentVariableName: string,
-    operationType: string,
-    operationResultType: string,
-    operationVariablesTypes: string,
-    hasRequiredVariables: boolean
-  ): string => {
-    // operationResultType = this._externalImportPrefix + operationResultType
-    // operationVariablesTypes =
-    //   this._externalImportPrefix + operationVariablesTypes
-
-    return [
-      node,
-      documentVariableName,
-      operationType,
-      operationResultType,
-      operationVariablesTypes,
-      hasRequiredVariables,
-    ]
-      .filter(Boolean)
-      .join("\n")
   }
 
   public OperationDefinition = (node: OperationDefinitionNode): string => {
