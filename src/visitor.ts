@@ -86,7 +86,7 @@ export class MethodsVisitor {
   // }
 
   getBaseClass = () => {
-    let mutations: { name: string }[] = []
+    let mutations: string[] = Array.from(this.mutations)
     let toMutation = (name: string) => {
       name = pascalCase(name)
       return `
@@ -109,7 +109,7 @@ export class MethodsVisitor {
                 this.client = client;
             }
 
-            ${mutations.map((x) => toMutation(x.name))}
+            ${mutations.map(toMutation)}
         }
       
       `

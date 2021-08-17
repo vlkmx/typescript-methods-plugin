@@ -34,12 +34,12 @@ var MethodsVisitor = /** @class */ (function () {
         //     : documentVariableName
         // }
         this.getBaseClass = function () {
-            var mutations = [];
+            var mutations = Array.from(_this.mutations);
             var toMutation = function (name) {
                 name = change_case_all_1.pascalCase(name);
                 return "\n      mutate" + name + " = async (variables: " + name + "MutationVariables) => {\n        return this.client.mutate<\n          " + name + "Mutation,\n          " + name + "MutationVariables\n          >({\n            mutation: " + name + "Document,\n            variables,\n        });\n  }\n\n  ";
             };
-            var base = "\n        class GQLMethods<ClientType> {\n            client: ClientType;\n\n            constructor(client: ClientType) {\n                this.client = client;\n            }\n\n            " + mutations.map(function (x) { return toMutation(x.name); }) + "\n        }\n      \n      ";
+            var base = "\n        class GQLMethods<ClientType> {\n            client: ClientType;\n\n            constructor(client: ClientType) {\n                this.client = client;\n            }\n\n            " + mutations.map(toMutation) + "\n        }\n      \n      ";
             return base;
         };
         // public getImports = (): string[] => {
