@@ -111,7 +111,7 @@ export class MethodsVisitor {
     return `
       import { ApolloClient } from '@apollo/client';
       import {
-        ${imports.join("\n")}
+        ${imports.join(",\n")}
       } from '${this.typeImportsPath}';\n
       `
   }
