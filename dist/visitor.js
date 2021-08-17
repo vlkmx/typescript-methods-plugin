@@ -10,12 +10,16 @@ var GROUPED_APOLLO_CLIENT_3_IDENTIFIER = "Apollo";
 //   MethodsPluginConfig
 // > {
 var MethodsVisitor = /** @class */ (function () {
-    // private _documents: Types.DocumentFile[]
     function MethodsVisitor(schema, fragments, rawConfig, documents) {
         // super(schema, fragments, rawConfig, {})
+        var _this = this;
         this.rawConfig = rawConfig;
         // private _externalImportPrefix: string
         this.imports = new Set();
+        // private _documents: Types.DocumentFile[]
+        this.mutations = new Set();
+        this.subscriptions = new Set();
+        this.queries = new Set();
         this.getImportStatement = function (isTypeImport) {
             return isTypeImport ? "import type" : "import";
         };
@@ -32,7 +36,12 @@ var MethodsVisitor = /** @class */ (function () {
         // }
         this.getBaseClass = function () {
             var mutations = [];
-            var base = "\n        class GQLMethods<ClientType> {\n            client: ClientType;\n\n            constructor(client: ClientType) {\n                this.client = client;\n            }\n\n            " + mutations.map(function (m) { return "\n                mutate" + change_case_all_1.pascalCase(m.name) + " = async (variables?: " + m.variablesType + ") => (variables: SendMessageMutationVariables) => {\n                return await this.client.apolloClient.mutate<\n                    SendMessageMutation,\n                    SendMessageMutationVariables\n                >({\n                    mutation: SendMessageDocument,\n                    variables,\n                });\n            }\n            "; }) + "\n        }\n      \n      ";
+            var toMutation = function (name) {
+                name = change_case_all_1.pascalCase(name);
+                return "\n      mutate" + name + " = async (variables: " + name + "MutationVariables) => {\n        return this.client.mutate<\n          " + name + "Mutation,\n          " + name + "MutationVariables\n          >({\n            mutation: " + name + "Document,\n            variables,\n        });\n  }\n\n  ";
+            };
+            var base = "\n        class GQLMethods<ClientType> {\n            client: ClientType;\n\n            constructor(client: ClientType) {\n                this.client = client;\n            }\n\n            " + mutations.map(function (x) { return toMutation(x.name); }) + "\n        }\n      \n      ";
+            return base;
         };
         // public getImports = (): string[] => {
         //   const baseImports = super.getImports()
@@ -81,6 +90,9 @@ var MethodsVisitor = /** @class */ (function () {
                 .filter(Boolean)
                 .join("\n");
         };
+        this.output = function () {
+            return _this.getBaseClass();
+        };
         // this._externalImportPrefix = this.config.importOperationTypesFrom
         //   ? `${this.config.importOperationTypesFrom}.`
         //   : ""
@@ -91,6 +103,20 @@ var MethodsVisitor = /** @class */ (function () {
         return visitor_plugin_common_1.OMIT_TYPE;
     };
     MethodsVisitor.prototype.OperationDefinition = function (node) {
+        var _a;
+        var name = (_a = node.name) === null || _a === void 0 ? void 0 : _a.value;
+        if (!name) {
+            return "";
+        }
+        if (node.operation === "query") {
+            this.queries.add(name);
+        }
+        else if (node.operation === "mutation") {
+            this.mutations.add(name);
+        }
+        if (node.operation === "subscription") {
+            this.subscriptions.add(name);
+        }
         return "";
     };
     return MethodsVisitor;

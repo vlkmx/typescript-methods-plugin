@@ -40,6 +40,9 @@ export class MethodsVisitor {
   // private _externalImportPrefix: string
   private imports = new Set<string>()
   // private _documents: Types.DocumentFile[]
+  private mutations = new Set<string>()
+  private subscriptions = new Set<string>()
+  private queries = new Set<string>()
 
   constructor(
     schema: GraphQLSchema,
@@ -81,7 +84,21 @@ export class MethodsVisitor {
   // }
 
   private getBaseClass = () => {
-    let mutations: { name: string; variablesType: string }[] = []
+    let mutations: { name: string }[] = []
+    let toMutation = (name: string) => {
+      name = pascalCase(name)
+      return `
+      mutate${name} = async (variables: ${name}MutationVariables) => {
+        return this.client.mutate<
+          ${name}Mutation,
+          ${name}MutationVariables
+          >({
+            mutation: ${name}Document,
+            variables,
+        });
+  }\n
+  `
+    }
     let base = `
         class GQLMethods<ClientType> {
             client: ClientType;
@@ -90,24 +107,12 @@ export class MethodsVisitor {
                 this.client = client;
             }
 
-            ${mutations.map(
-              (m) => `
-                mutate${pascalCase(m.name)} = async (variables?: ${
-                m.variablesType
-              }) => (variables: SendMessageMutationVariables) => {
-                return await this.client.apolloClient.mutate<
-                    SendMessageMutation,
-                    SendMessageMutationVariables
-                >({
-                    mutation: SendMessageDocument,
-                    variables,
-                });
-            }
-            `
-            )}
+            ${mutations.map((x) => toMutation(x.name))}
         }
       
       `
+
+    return base
   }
 
   // public getImports = (): string[] => {
@@ -172,6 +177,22 @@ export class MethodsVisitor {
   }
 
   public OperationDefinition(node: OperationDefinitionNode): string {
+    let name = node.name?.value
+    if (!name) {
+      return ""
+    }
+    if (node.operation === "query") {
+      this.queries.add(name)
+    } else if (node.operation === "mutation") {
+      this.mutations.add(name)
+    }
+    if (node.operation === "subscription") {
+      this.subscriptions.add(name)
+    }
     return ""
+  }
+
+  output = () => {
+    return this.getBaseClass()
   }
 }

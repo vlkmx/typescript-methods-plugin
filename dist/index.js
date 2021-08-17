@@ -22,7 +22,11 @@ var plugin = function (schema, documents, config) {
     var visitorResult = graphql_1.visit(allAst, { leave: visitor });
     return {
         // prepend: visitor.getImports(),
-        content: __spreadArray([], visitorResult.definitions.filter(function (t) { return typeof t === "string"; })).join("\n"),
+        content: [
+            // visitor.fragments,
+            // ...visitorResult.definitions.filter((t: any) => typeof t === "string"),
+            visitor.output(),
+        ].join("\n"),
     };
 };
 exports.plugin = plugin;

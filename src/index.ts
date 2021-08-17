@@ -49,7 +49,8 @@ export const plugin: PluginFunction<
     // prepend: visitor.getImports(),
     content: [
       // visitor.fragments,
-      ...visitorResult.definitions.filter((t: any) => typeof t === "string"),
+      // ...visitorResult.definitions.filter((t: any) => typeof t === "string"),
+      visitor.output(),
     ].join("\n"),
   }
 }
