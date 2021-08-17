@@ -53,7 +53,10 @@ export class MethodsVisitor {
     //   ? `${this.config.importOperationTypesFrom}.`
     //   : ""
     // this._documents = documents
-    console.log("@@ VISITOR", fragments, documents)
+    console.log(
+      "@@ VISITOR",
+      documents.map((x) => x.document?.definitions)
+    )
   }
 
   private getImportStatement = (isTypeImport: boolean): string => {
