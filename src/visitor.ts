@@ -117,20 +117,9 @@ export class MethodsVisitor {
   }
 
   getBaseClass = () => {
+    let queries: string[] = Array.from(this.queries)
     let mutations: string[] = Array.from(this.mutations)
-    let toMutation = (name: string) => {
-      name = pascalCase(name)
-      return `
-      mutate${name} = async (variables: ${name}MutationVariables) => {
-        return this.client.mutate<
-          ${name}Mutation,
-          ${name}MutationVariables
-          >({
-            mutation: ${name}Document,
-            variables,
-        });
-    }`
-    }
+    let subscriptions: string[] = Array.from(this.subscriptions)
     let base = `
         class GQLMethods {
             private client: ApolloClient<NormalizedCache>;
@@ -139,12 +128,58 @@ export class MethodsVisitor {
                 this.client = client;
             }
 
-            ${mutations.map(toMutation).join("\n")}
+            ${queries.map(this.toQuery).join("\n")}
+
+            ${mutations.map(this.toMutation).join("\n")}
+
+            ${subscriptions.map(this.toSubscription).join("\n")}
         }
       
       `
 
     return base
+  }
+
+  toMutation = (name: string) => {
+    name = pascalCase(name)
+    return `
+    mutate${name} = (variables: ${name}MutationVariables) => {
+      return this.client.mutate<
+        ${name}Mutation,
+        ${name}MutationVariables
+        >({
+          mutation: ${name}Document,
+          variables,
+      });
+  }`
+  }
+
+  toQuery = (name: string) => {
+    name = pascalCase(name)
+    return `
+    query${name} = (variables: ${name}QueryVariables) => {
+      return this.client.query<
+        ${name}Query,
+        ${name}QueryVariables
+        >({
+          query: ${name}Document,
+          variables,
+      });
+  }`
+  }
+
+  toSubscription = (name: string) => {
+    name = pascalCase(name)
+    return `
+    subscribe${name} = (variables: ${name}SubscriptionVariables) => {
+      return this.client.subscribe<
+        ${name}Subscription,
+        ${name}SubscriptionVariables
+        >({
+          query: ${name}Document,
+          variables,
+      });
+  }`
   }
 
   // public getImports = (): string[] => {

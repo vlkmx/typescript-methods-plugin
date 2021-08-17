@@ -16,6 +16,9 @@ export declare class MethodsVisitor {
     private getOmitDeclaration;
     getImports: () => string;
     getBaseClass: () => string;
+    toMutation: (name: string) => string;
+    toQuery: (name: string) => string;
+    toSubscription: (name: string) => string;
     protected buildOperation: (node: OperationDefinitionNode, documentVariableName: string, operationType: string, operationResultType: string, operationVariablesTypes: string, hasRequiredVariables: boolean) => string;
     OperationDefinition: (node: OperationDefinitionNode) => string;
 }
