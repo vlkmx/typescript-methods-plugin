@@ -1,4 +1,9 @@
 "use strict";
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MethodsVisitor = void 0;
 var visitor_plugin_common_1 = require("@graphql-codegen/visitor-plugin-common");
@@ -14,6 +19,7 @@ var MethodsVisitor = /** @class */ (function () {
         var _this = this;
         this.rawConfig = rawConfig;
         // private _externalImportPrefix: string
+        this.typeImportsPath = "./types.generated.ts";
         this.imports = new Set();
         // private _documents: Types.DocumentFile[]
         this.mutations = new Set();
@@ -33,13 +39,38 @@ var MethodsVisitor = /** @class */ (function () {
         //     ? `Operations.${node.name?.value ?? ""}`
         //     : documentVariableName
         // }
+        this.getImports = function () {
+            var queriesImports = Array.from(_this.queries).map(function (name) { return [
+                name + "Query",
+                name + "QueryVariables",
+                name + "Document",
+            ]; });
+            var mutationsImports = Array.from(_this.mutations).map(function (name) { return [
+                name + "Mutation",
+                name + "MutationVariables",
+                name + "Document",
+            ]; });
+            var subscriptionsImports = Array.from(_this.subscriptions).map(function (name) { return [
+                name + "Subscription",
+                name + "SubscriptionVariables",
+                name + "Document",
+            ]; });
+            var imports = queriesImports
+                .concat(mutationsImports)
+                .concat(subscriptionsImports)
+                .reduce(function (acc, x) { return __spreadArray(__spreadArray([], acc), x); }, []);
+            return [
+                "import { ApolloClient } from '@apollo/client';",
+                "import {\n        " + imports.join("\n") + "\n      } from '" + _this.typeImportsPath + "';",
+            ];
+        };
         this.getBaseClass = function () {
             var mutations = Array.from(_this.mutations);
             var toMutation = function (name) {
                 name = change_case_all_1.pascalCase(name);
                 return "\n      mutate" + name + " = async (variables: " + name + "MutationVariables) => {\n        return this.client.mutate<\n          " + name + "Mutation,\n          " + name + "MutationVariables\n          >({\n            mutation: " + name + "Document,\n            variables,\n        });\n  }\n\n  ";
             };
-            var base = "\n        class GQLMethods<ClientType> {\n            client: ClientType;\n\n            constructor(client: ClientType) {\n                this.client = client;\n            }\n\n            " + mutations.map(toMutation) + "\n        }\n      \n      ";
+            var base = "\n        class GQLMethods {\n            private client: ApolloClient;\n\n            constructor(client: ApolloClient) {\n                this.client = client;\n            }\n\n            " + mutations.map(toMutation) + "\n        }\n      \n      ";
             return base;
         };
         // public getImports = (): string[] => {
@@ -95,7 +126,6 @@ var MethodsVisitor = /** @class */ (function () {
             if (!name) {
                 return "";
             }
-            console.log("@@ope", _this.queries, _this.mutations);
             if (node.operation === "query") {
                 _this.queries.add(name);
             }
@@ -106,9 +136,6 @@ var MethodsVisitor = /** @class */ (function () {
                 _this.subscriptions.add(name);
             }
             return "";
-        };
-        this.output = function () {
-            return _this.getBaseClass();
         };
         // super(schema, fragments, rawConfig, {})
         // this._externalImportPrefix = this.config.importOperationTypesFrom

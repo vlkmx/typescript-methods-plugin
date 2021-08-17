@@ -20,13 +20,12 @@ var plugin = function (schema, documents, config) {
     }); })), (config.externalFragments || []));
     var visitor = new visitor_1.MethodsVisitor(schema, allFragments, config, documents);
     var visitorResult = graphql_1.visit(allAst, { leave: visitor });
-    console.log("@@ INDE", visitor.output(), visitor.getBaseClass());
     return {
-        // prepend: visitor.getImports(),
+        prepend: visitor.getImports(),
         content: [
             // visitor.fragments,
             // ...visitorResult.definitions.filter((t: any) => typeof t === "string"),
-            visitor.output(),
+            visitor.getBaseClass(),
         ].join("\n"),
     };
 };

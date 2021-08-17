@@ -38,6 +38,7 @@ export interface MethodsPluginConfig extends ClientSideBasePluginConfig {
 // > {
 export class MethodsVisitor {
   // private _externalImportPrefix: string
+  private typeImportsPath = "./types.generated.ts"
   private imports = new Set<string>()
   // private _documents: Types.DocumentFile[]
   private mutations = new Set<string>()
@@ -85,6 +86,36 @@ export class MethodsVisitor {
   //     : documentVariableName
   // }
 
+  getImports = () => {
+    let queriesImports = Array.from(this.queries).map((name) => [
+      `${name}Query`,
+      `${name}QueryVariables`,
+      `${name}Document`,
+    ])
+    let mutationsImports = Array.from(this.mutations).map((name) => [
+      `${name}Mutation`,
+      `${name}MutationVariables`,
+      `${name}Document`,
+    ])
+    let subscriptionsImports = Array.from(this.subscriptions).map((name) => [
+      `${name}Subscription`,
+      `${name}SubscriptionVariables`,
+      `${name}Document`,
+    ])
+
+    let imports = queriesImports
+      .concat(mutationsImports)
+      .concat(subscriptionsImports)
+      .reduce((acc, x) => [...acc, ...x], [])
+
+    return [
+      `import { ApolloClient } from '@apollo/client';`,
+      `import {
+        ${imports.join("\n")}
+      } from '${this.typeImportsPath}';`,
+    ]
+  }
+
   getBaseClass = () => {
     let mutations: string[] = Array.from(this.mutations)
     let toMutation = (name: string) => {
@@ -102,10 +133,10 @@ export class MethodsVisitor {
   `
     }
     let base = `
-        class GQLMethods<ClientType> {
-            client: ClientType;
+        class GQLMethods {
+            private client: ApolloClient;
 
-            constructor(client: ClientType) {
+            constructor(client: ApolloClient) {
                 this.client = client;
             }
 
@@ -183,7 +214,7 @@ export class MethodsVisitor {
     if (!name) {
       return ""
     }
-    console.log("@@ope", this.queries, this.mutations)
+
     if (node.operation === "query") {
       this.queries.add(name)
     } else if (node.operation === "mutation") {
@@ -193,9 +224,5 @@ export class MethodsVisitor {
       this.subscriptions.add(name)
     }
     return ""
-  }
-
-  output = () => {
-    return this.getBaseClass()
   }
 }

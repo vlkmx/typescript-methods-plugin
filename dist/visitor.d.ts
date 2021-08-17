@@ -5,6 +5,7 @@ export interface MethodsPluginConfig extends ClientSideBasePluginConfig {
 }
 export declare class MethodsVisitor {
     protected rawConfig: MethodsPluginConfig;
+    private typeImportsPath;
     private imports;
     private mutations;
     private subscriptions;
@@ -13,8 +14,8 @@ export declare class MethodsVisitor {
     private getImportStatement;
     private getReactImport;
     private getOmitDeclaration;
+    getImports: () => string[];
     getBaseClass: () => string;
     protected buildOperation: (node: OperationDefinitionNode, documentVariableName: string, operationType: string, operationResultType: string, operationVariablesTypes: string, hasRequiredVariables: boolean) => string;
     OperationDefinition: (node: OperationDefinitionNode) => string;
-    output: () => string;
 }
