@@ -41,9 +41,9 @@ export class MethodsVisitor {
   private typeImportsPath = "./types.generated"
   private imports = new Set<string>()
   // private _documents: Types.DocumentFile[]
-  private mutations = new Set<string>()
-  private subscriptions = new Set<string>()
-  private queries = new Set<string>()
+  private mutations = new Set<{ name: string; hasVariables: boolean }>()
+  private subscriptions = new Set<{ name: string; hasVariables: boolean }>()
+  private queries = new Set<{ name: string; hasVariables: boolean }>()
 
   constructor(
     schema: GraphQLSchema,
@@ -117,9 +117,9 @@ export class MethodsVisitor {
   }
 
   getBaseClass = () => {
-    let queries: string[] = Array.from(this.queries)
-    let mutations: string[] = Array.from(this.mutations)
-    let subscriptions: string[] = Array.from(this.subscriptions)
+    let queries = Array.from(this.queries)
+    let mutations = Array.from(this.mutations)
+    let subscriptions = Array.from(this.subscriptions)
     let base = `
         export class GQLClient extends ApolloClient<NormalizedCacheObject>{
 
@@ -135,10 +135,21 @@ export class MethodsVisitor {
     return base
   }
 
-  toMutation = (name: string) => {
+  toMutation = ({
+    name,
+    hasVariables,
+  }: {
+    name: string
+    hasVariables: boolean
+  }) => {
     name = pascalCase(name)
+    let paramsDeclaration = this.getParamsDeclaration({
+      name,
+      hasVariables,
+      type: "mutation",
+    })
     return `
-    mutate${name} = (variables: ${name}MutationVariables) => {
+    mutate${name} = ${paramsDeclaration} => {
       return this.mutate<
         ${name}Mutation,
         ${name}MutationVariables
@@ -149,10 +160,21 @@ export class MethodsVisitor {
   }`
   }
 
-  toQuery = (name: string) => {
+  toQuery = ({
+    name,
+    hasVariables,
+  }: {
+    name: string
+    hasVariables: boolean
+  }) => {
     name = pascalCase(name)
+    let paramsDeclaration = this.getParamsDeclaration({
+      name,
+      hasVariables,
+      type: "query",
+    })
     return `
-    query${name} = (variables: ${name}QueryVariables) => {
+    query${name} = ${paramsDeclaration} => {
       return this.query<
         ${name}Query,
         ${name}QueryVariables
@@ -163,10 +185,21 @@ export class MethodsVisitor {
   }`
   }
 
-  toSubscription = (name: string) => {
+  toSubscription = ({
+    name,
+    hasVariables,
+  }: {
+    name: string
+    hasVariables: boolean
+  }) => {
     name = pascalCase(name)
+    let paramsDeclaration = this.getParamsDeclaration({
+      name,
+      hasVariables,
+      type: "query",
+    })
     return `
-    subscribe${name} = (variables: ${name}SubscriptionVariables) => {
+    subscribe${name} = ${paramsDeclaration} => {
       return this.subscribe<
         ${name}Subscription,
         ${name}SubscriptionVariables
@@ -175,6 +208,33 @@ export class MethodsVisitor {
           variables,
       });
   }`
+  }
+
+  private getParamsDeclaration = (ops: {
+    name: string
+    type: "query" | "mutation" | "subscription"
+    hasVariables: boolean
+  }) => {
+    let opName = this.getOperationName(ops.type)
+    return ops.hasVariables
+      ? `(variables: ${
+          ops.name
+        }${opName}Variables, ${this.getRequestOptions()})`
+      : `(${this.getRequestOptions()})`
+  }
+
+  private getRequestOptions = () => {
+    return `options?: {fetchPolicy: 'network-only' | 'cache-and-network' | 'no-cache' | 'cache-only'}`
+  }
+
+  private getOperationName = (type: "query" | "mutation" | "subscription") => {
+    if (type === "query") {
+      return "Query"
+    } else if (type === "mutation") {
+      return "Mutation"
+    } else {
+      return "Subscription"
+    }
   }
 
   // public getImports = (): string[] => {
@@ -240,17 +300,18 @@ export class MethodsVisitor {
 
   public OperationDefinition = (node: OperationDefinitionNode): string => {
     let name = node.name?.value
+    let hasVariables = Boolean(node.variableDefinitions?.length)
     if (!name) {
       return ""
     }
 
     if (node.operation === "query") {
-      this.queries.add(name)
+      this.queries.add({ name, hasVariables })
     } else if (node.operation === "mutation") {
-      this.mutations.add(name)
+      this.mutations.add({ name, hasVariables })
     }
     if (node.operation === "subscription") {
-      this.subscriptions.add(name)
+      this.subscriptions.add({ name, hasVariables })
     }
     return ""
   }

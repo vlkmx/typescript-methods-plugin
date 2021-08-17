@@ -68,17 +68,55 @@ var MethodsVisitor = /** @class */ (function () {
             var base = "\n        export class GQLClient extends ApolloClient<NormalizedCacheObject>{\n\n            " + queries.map(_this.toQuery).join("\n") + "\n\n            " + mutations.map(_this.toMutation).join("\n") + "\n\n            " + subscriptions.map(_this.toSubscription).join("\n") + "\n        }\n      \n      ";
             return base;
         };
-        this.toMutation = function (name) {
+        this.toMutation = function (_a) {
+            var name = _a.name, hasVariables = _a.hasVariables;
             name = change_case_all_1.pascalCase(name);
-            return "\n    mutate" + name + " = (variables: " + name + "MutationVariables) => {\n      return this.mutate<\n        " + name + "Mutation,\n        " + name + "MutationVariables\n        >({\n          mutation: " + name + "Document,\n          variables,\n      });\n  }";
+            var paramsDeclaration = _this.getParamsDeclaration({
+                name: name,
+                hasVariables: hasVariables,
+                type: "mutation",
+            });
+            return "\n    mutate" + name + " = " + paramsDeclaration + " => {\n      return this.mutate<\n        " + name + "Mutation,\n        " + name + "MutationVariables\n        >({\n          mutation: " + name + "Document,\n          variables,\n      });\n  }";
         };
-        this.toQuery = function (name) {
+        this.toQuery = function (_a) {
+            var name = _a.name, hasVariables = _a.hasVariables;
             name = change_case_all_1.pascalCase(name);
-            return "\n    query" + name + " = (variables: " + name + "QueryVariables) => {\n      return this.query<\n        " + name + "Query,\n        " + name + "QueryVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
+            var paramsDeclaration = _this.getParamsDeclaration({
+                name: name,
+                hasVariables: hasVariables,
+                type: "query",
+            });
+            return "\n    query" + name + " = " + paramsDeclaration + " => {\n      return this.query<\n        " + name + "Query,\n        " + name + "QueryVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
         };
-        this.toSubscription = function (name) {
+        this.toSubscription = function (_a) {
+            var name = _a.name, hasVariables = _a.hasVariables;
             name = change_case_all_1.pascalCase(name);
-            return "\n    subscribe" + name + " = (variables: " + name + "SubscriptionVariables) => {\n      return this.subscribe<\n        " + name + "Subscription,\n        " + name + "SubscriptionVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
+            var paramsDeclaration = _this.getParamsDeclaration({
+                name: name,
+                hasVariables: hasVariables,
+                type: "query",
+            });
+            return "\n    subscribe" + name + " = " + paramsDeclaration + " => {\n      return this.subscribe<\n        " + name + "Subscription,\n        " + name + "SubscriptionVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
+        };
+        this.getParamsDeclaration = function (ops) {
+            var opName = _this.getOperationName(ops.type);
+            return ops.hasVariables
+                ? "(variables: " + ops.name + opName + "Variables, " + _this.getRequestOptions() + ")"
+                : "(" + _this.getRequestOptions() + ")";
+        };
+        this.getRequestOptions = function () {
+            return "options?: {fetchPolicy: 'network-only' | 'cache-and-network' | 'no-cache' | 'cache-only'}";
+        };
+        this.getOperationName = function (type) {
+            if (type === "query") {
+                return "Query";
+            }
+            else if (type === "mutation") {
+                return "Mutation";
+            }
+            else {
+                return "Subscription";
+            }
         };
         // public getImports = (): string[] => {
         //   const baseImports = super.getImports()
@@ -128,19 +166,20 @@ var MethodsVisitor = /** @class */ (function () {
                 .join("\n");
         };
         this.OperationDefinition = function (node) {
-            var _a;
+            var _a, _b;
             var name = (_a = node.name) === null || _a === void 0 ? void 0 : _a.value;
+            var hasVariables = Boolean((_b = node.variableDefinitions) === null || _b === void 0 ? void 0 : _b.length);
             if (!name) {
                 return "";
             }
             if (node.operation === "query") {
-                _this.queries.add(name);
+                _this.queries.add({ name: name, hasVariables: hasVariables });
             }
             else if (node.operation === "mutation") {
-                _this.mutations.add(name);
+                _this.mutations.add({ name: name, hasVariables: hasVariables });
             }
             if (node.operation === "subscription") {
-                _this.subscriptions.add(name);
+                _this.subscriptions.add({ name: name, hasVariables: hasVariables });
             }
             return "";
         };
