@@ -85,7 +85,7 @@ var MethodsVisitor = /** @class */ (function () {
         //   ? `${this.config.importOperationTypesFrom}.`
         //   : ""
         // this._documents = documents
-        console.log("@@ VISITOR", fragments, documents);
+        console.log("@@ VISITOR", documents.map(function (x) { var _a; return (_a = x.document) === null || _a === void 0 ? void 0 : _a.definitions; }));
     }
     MethodsVisitor.prototype.getOmitDeclaration = function () {
         return visitor_plugin_common_1.OMIT_TYPE;
