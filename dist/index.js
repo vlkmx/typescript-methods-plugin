@@ -21,7 +21,7 @@ var plugin = function (schema, documents, config) {
     var visitor = new visitor_1.MethodsVisitor();
     graphql_1.visit(allAst, { leave: visitor });
     var content = [visitor.getImports(), visitor.getBaseClass()].join("\n");
-    var formattedContent = prettier_1.default.format(content, {
+    var formattedContent = prettier_1.format(content, {
         semi: true,
         singleQuote: true,
         tabWidth: 4,
