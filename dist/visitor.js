@@ -85,7 +85,7 @@ var MethodsVisitor = /** @class */ (function () {
                 hasVariables: hasVariables,
                 type: "mutation",
             });
-            return "\n    mutate" + name + " = " + paramsDeclaration + " => {\n      return this.mutate<\n        " + name + "Mutation,\n        " + name + "MutationVariables\n        >({\n          mutation: " + name + "Document,\n          variables,\n      });\n  }";
+            return "\n    mutate" + name + " = " + paramsDeclaration + " => {\n      return this.mutate<\n        " + name + "Mutation,\n        " + name + "MutationVariables\n        >({\n          mutation: " + name + "Document,\n          " + (hasVariables ? "variables,\n...options" : "...options") + "\n      });\n  }";
         };
         this.toQuery = function (_a) {
             var name = _a.name, hasVariables = _a.hasVariables;
@@ -95,7 +95,7 @@ var MethodsVisitor = /** @class */ (function () {
                 hasVariables: hasVariables,
                 type: "query",
             });
-            return "\n    query" + name + " = " + paramsDeclaration + " => {\n      return this.query<\n        " + name + "Query,\n        " + name + "QueryVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
+            return "\n    query" + name + " = " + paramsDeclaration + " => {\n      return this.query<\n        " + name + "Query,\n        " + name + "QueryVariables\n        >({\n          query: " + name + "Document,\n          " + (hasVariables ? "variables,\n...options" : "...options") + "\n      });\n  }";
         };
         this.toSubscription = function (_a) {
             var name = _a.name, hasVariables = _a.hasVariables;
@@ -103,9 +103,9 @@ var MethodsVisitor = /** @class */ (function () {
             var paramsDeclaration = _this.getParamsDeclaration({
                 name: name,
                 hasVariables: hasVariables,
-                type: "query",
+                type: "subscription",
             });
-            return "\n    subscribe" + name + " = " + paramsDeclaration + " => {\n      return this.subscribe<\n        " + name + "Subscription,\n        " + name + "SubscriptionVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
+            return "\n    subscribe" + name + " = " + paramsDeclaration + " => {\n      return this.subscribe<\n        " + name + "Subscription,\n        " + name + "SubscriptionVariables\n        >({\n          query: " + name + "Document,\n          " + (hasVariables ? "variables,\n...options" : "...options") + "\n      });\n  }";
         };
         this.getParamsDeclaration = function (ops) {
             var opName = _this.getOperationName(ops.type);
@@ -114,7 +114,7 @@ var MethodsVisitor = /** @class */ (function () {
                 : "(" + _this.getRequestOptions() + ")";
         };
         this.getRequestOptions = function () {
-            return "options?: {fetchPolicy: 'network-only' | 'cache-and-network' | 'no-cache' | 'cache-only'}";
+            return "options?: {fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only'}";
         };
         this.getOperationName = function (type) {
             if (type === "query") {

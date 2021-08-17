@@ -157,7 +157,7 @@ export class MethodsVisitor {
         ${name}MutationVariables
         >({
           mutation: ${name}Document,
-          variables,
+          ${hasVariables ? `variables,\n...options` : `...options`}
       });
   }`
   }
@@ -182,7 +182,7 @@ export class MethodsVisitor {
         ${name}QueryVariables
         >({
           query: ${name}Document,
-          variables,
+          ${hasVariables ? `variables,\n...options` : `...options`}
       });
   }`
   }
@@ -198,7 +198,7 @@ export class MethodsVisitor {
     let paramsDeclaration = this.getParamsDeclaration({
       name,
       hasVariables,
-      type: "query",
+      type: "subscription",
     })
     return `
     subscribe${name} = ${paramsDeclaration} => {
@@ -207,7 +207,7 @@ export class MethodsVisitor {
         ${name}SubscriptionVariables
         >({
           query: ${name}Document,
-          variables,
+          ${hasVariables ? `variables,\n...options` : `...options`}
       });
   }`
   }
@@ -226,7 +226,7 @@ export class MethodsVisitor {
   }
 
   private getRequestOptions = () => {
-    return `options?: {fetchPolicy: 'network-only' | 'cache-and-network' | 'no-cache' | 'cache-only'}`
+    return `options?: {fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only'}`
   }
 
   private getOperationName = (type: "query" | "mutation" | "subscription") => {
