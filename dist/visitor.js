@@ -59,26 +59,26 @@ var MethodsVisitor = /** @class */ (function () {
                 .concat(mutationsImports)
                 .concat(subscriptionsImports)
                 .reduce(function (acc, x) { return __spreadArray(__spreadArray([], acc), x); }, []);
-            return "\n      import { ApolloClient, NormalizedCache } from '@apollo/client';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
+            return "\n      import { ApolloClient, NormalizedCacheObject } from '@apollo/client';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
         };
         this.getBaseClass = function () {
             var queries = Array.from(_this.queries);
             var mutations = Array.from(_this.mutations);
             var subscriptions = Array.from(_this.subscriptions);
-            var base = "\n        class GQLMethods {\n            private client: ApolloClient<NormalizedCache>;\n\n            constructor(client: ApolloClient<NormalizedCache>) {\n                this.client = client;\n            }\n\n            " + queries.map(_this.toQuery).join("\n") + "\n\n            " + mutations.map(_this.toMutation).join("\n") + "\n\n            " + subscriptions.map(_this.toSubscription).join("\n") + "\n        }\n      \n      ";
+            var base = "\n        export class GQLClient extends ApolloClient<NormalizedCacheObject>{\n\n            " + queries.map(_this.toQuery).join("\n") + "\n\n            " + mutations.map(_this.toMutation).join("\n") + "\n\n            " + subscriptions.map(_this.toSubscription).join("\n") + "\n        }\n      \n      ";
             return base;
         };
         this.toMutation = function (name) {
             name = change_case_all_1.pascalCase(name);
-            return "\n    mutate" + name + " = (variables: " + name + "MutationVariables) => {\n      return this.client.mutate<\n        " + name + "Mutation,\n        " + name + "MutationVariables\n        >({\n          mutation: " + name + "Document,\n          variables,\n      });\n  }";
+            return "\n    mutate" + name + " = (variables: " + name + "MutationVariables) => {\n      return this.mutate<\n        " + name + "Mutation,\n        " + name + "MutationVariables\n        >({\n          mutation: " + name + "Document,\n          variables,\n      });\n  }";
         };
         this.toQuery = function (name) {
             name = change_case_all_1.pascalCase(name);
-            return "\n    query" + name + " = (variables: " + name + "QueryVariables) => {\n      return this.client.query<\n        " + name + "Query,\n        " + name + "QueryVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
+            return "\n    query" + name + " = (variables: " + name + "QueryVariables) => {\n      return this.query<\n        " + name + "Query,\n        " + name + "QueryVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
         };
         this.toSubscription = function (name) {
             name = change_case_all_1.pascalCase(name);
-            return "\n    subscribe" + name + " = (variables: " + name + "SubscriptionVariables) => {\n      return this.client.subscribe<\n        " + name + "Subscription,\n        " + name + "SubscriptionVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
+            return "\n    subscribe" + name + " = (variables: " + name + "SubscriptionVariables) => {\n      return this.subscribe<\n        " + name + "Subscription,\n        " + name + "SubscriptionVariables\n        >({\n          query: " + name + "Document,\n          variables,\n      });\n  }";
         };
         // public getImports = (): string[] => {
         //   const baseImports = super.getImports()

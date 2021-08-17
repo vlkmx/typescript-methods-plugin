@@ -109,7 +109,7 @@ export class MethodsVisitor {
       .reduce((acc, x) => [...acc, ...x], [])
 
     return `
-      import { ApolloClient, NormalizedCache } from '@apollo/client';
+      import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
       import {
         ${imports.join(",\n")}
       } from '${this.typeImportsPath}';\n
@@ -121,12 +121,7 @@ export class MethodsVisitor {
     let mutations: string[] = Array.from(this.mutations)
     let subscriptions: string[] = Array.from(this.subscriptions)
     let base = `
-        class GQLMethods {
-            private client: ApolloClient<NormalizedCache>;
-
-            constructor(client: ApolloClient<NormalizedCache>) {
-                this.client = client;
-            }
+        export class GQLClient extends ApolloClient<NormalizedCacheObject>{
 
             ${queries.map(this.toQuery).join("\n")}
 
@@ -144,7 +139,7 @@ export class MethodsVisitor {
     name = pascalCase(name)
     return `
     mutate${name} = (variables: ${name}MutationVariables) => {
-      return this.client.mutate<
+      return this.mutate<
         ${name}Mutation,
         ${name}MutationVariables
         >({
@@ -158,7 +153,7 @@ export class MethodsVisitor {
     name = pascalCase(name)
     return `
     query${name} = (variables: ${name}QueryVariables) => {
-      return this.client.query<
+      return this.query<
         ${name}Query,
         ${name}QueryVariables
         >({
@@ -172,7 +167,7 @@ export class MethodsVisitor {
     name = pascalCase(name)
     return `
     subscribe${name} = (variables: ${name}SubscriptionVariables) => {
-      return this.client.subscribe<
+      return this.subscribe<
         ${name}Subscription,
         ${name}SubscriptionVariables
         >({
