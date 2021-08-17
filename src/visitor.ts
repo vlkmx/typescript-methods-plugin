@@ -14,6 +14,8 @@ import { camelCase } from "change-case-all"
 const APOLLO_CLIENT_3_UNIFIED_PACKAGE = `@apollo/client`
 const GROUPED_APOLLO_CLIENT_3_IDENTIFIER = "Apollo"
 
+type OperationType = "query" | "mutation" | "subscription"
+
 export interface MethodsPluginConfig extends ClientSideBasePluginConfig {
   //   withComponent: boolean
   //   withHOC: boolean
@@ -150,6 +152,7 @@ export class MethodsVisitor {
       hasVariables,
       type: "mutation",
     })
+
     return `
     mutate${name} = ${paramsDeclaration} => {
       return this.mutate<
@@ -157,7 +160,7 @@ export class MethodsVisitor {
         ${name}MutationVariables
         >({
           mutation: ${name}Document,
-          ${hasVariables ? `variables,\n...options` : `...options`}
+          ${this.getVarsAndOptions(hasVariables)}
       });
   }`
   }
@@ -182,7 +185,7 @@ export class MethodsVisitor {
         ${name}QueryVariables
         >({
           query: ${name}Document,
-          ${hasVariables ? `variables,\n...options` : `...options`}
+          ${this.getVarsAndOptions(hasVariables)}
       });
   }`
   }
@@ -207,29 +210,43 @@ export class MethodsVisitor {
         ${name}SubscriptionVariables
         >({
           query: ${name}Document,
-          ${hasVariables ? `variables,\n...options` : `...options`}
+          ${this.getVarsAndOptions(hasVariables)}
       });
   }`
   }
 
+  private getVarsAndOptions = (hasVariables: boolean) => {
+    return hasVariables
+      ? `
+      variables,
+      ...options
+    `
+      : `
+      ...options
+    `
+  }
+
   private getParamsDeclaration = (ops: {
     name: string
-    type: "query" | "mutation" | "subscription"
+    type: OperationType
     hasVariables: boolean
   }) => {
     let opName = this.getOperationName(ops.type)
     return ops.hasVariables
-      ? `(variables: ${
-          ops.name
-        }${opName}Variables, ${this.getRequestOptions()})`
-      : `(${this.getRequestOptions()})`
+      ? `(variables: ${ops.name}${opName}Variables, ${this.getRequestOptions(
+          ops.type
+        )})`
+      : `(${this.getRequestOptions(ops.type)})`
   }
 
-  private getRequestOptions = () => {
-    return `options?: {fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only'}`
+  private getRequestOptions = (type?: OperationType) => {
+    let isMutation = type && type === "mutation"
+    return isMutation
+      ? `options?: {fetchPolicy: 'network-only' | 'no-cache'}`
+      : `options?: {fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only'}`
   }
 
-  private getOperationName = (type: "query" | "mutation" | "subscription") => {
+  private getOperationName = (type: OperationType) => {
     if (type === "query") {
       return "Query"
     } else if (type === "mutation") {

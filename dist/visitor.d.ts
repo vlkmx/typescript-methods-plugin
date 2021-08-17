@@ -28,6 +28,7 @@ export declare class MethodsVisitor {
         name: string;
         hasVariables: boolean;
     }) => string;
+    private getVarsAndOptions;
     private getParamsDeclaration;
     private getRequestOptions;
     private getOperationName;
