@@ -1,6 +1,7 @@
 import { Types, PluginFunction } from "@graphql-codegen/plugin-helpers"
 import { visit, GraphQLSchema, concatAST } from "graphql"
 import { MethodsVisitor } from "./visitor"
+import pretier from "prettier"
 
 export const plugin: PluginFunction<{}, Types.ComplexPluginOutput> = (
   schema: GraphQLSchema,
@@ -22,10 +23,19 @@ export const plugin: PluginFunction<{}, Types.ComplexPluginOutput> = (
   // ]
 
   const visitor = new MethodsVisitor()
-  const visitorResult = visit(allAst, { leave: visitor })
+  visit(allAst, { leave: visitor })
+  const content = [visitor.getImports(), visitor.getBaseClass()].join("\n")
+  const formattedContent = pretier.format(content, {
+    semi: true,
+    singleQuote: true,
+    tabWidth: 4,
+    printWidth: 100,
+    trailingComma: "all",
+    parser: "typescript",
+  })
 
   return {
-    content: [visitor.getImports(), visitor.getBaseClass()].join("\n"),
+    content: formattedContent,
   }
 }
 
