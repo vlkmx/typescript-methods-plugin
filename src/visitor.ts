@@ -59,6 +59,9 @@ export class MethodsVisitor {
     //   "@@ VISITOR",
     //   documents.map((x) => x.document?.definitions)
     // )
+    this.mutations = new Set<string>()
+    this.subscriptions = new Set<string>()
+    this.queries = new Set<string>()
   }
 
   private getImportStatement = (isTypeImport: boolean): string => {
@@ -180,6 +183,7 @@ export class MethodsVisitor {
     if (!name) {
       return ""
     }
+    console.log("@@ope", this.queries, this.mutations)
     if (node.operation === "query") {
       this.queries.add(name)
     } else if (node.operation === "mutation") {

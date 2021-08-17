@@ -101,6 +101,9 @@ var MethodsVisitor = /** @class */ (function () {
         //   "@@ VISITOR",
         //   documents.map((x) => x.document?.definitions)
         // )
+        this.mutations = new Set();
+        this.subscriptions = new Set();
+        this.queries = new Set();
     }
     MethodsVisitor.prototype.getOmitDeclaration = function () {
         return visitor_plugin_common_1.OMIT_TYPE;
@@ -111,6 +114,7 @@ var MethodsVisitor = /** @class */ (function () {
         if (!name) {
             return "";
         }
+        console.log("@@ope", this.queries, this.mutations);
         if (node.operation === "query") {
             this.queries.add(name);
         }
