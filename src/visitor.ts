@@ -33,7 +33,7 @@ export class MethodsVisitor {
       .reduce((acc, x) => [...acc, ...x], [])
 
     return `
-      import { ApolloClient, NormalizedCacheObject, FetchPolicy, MutationFetchPolicy } from '@apollo/client';
+      import { ApolloClient, NormalizedCacheObject, FetchPolicy } from '@apollo/client';
       import {
         ${imports.join(",\n")}
       } from '${this.typeImportsPath}';\n
@@ -154,7 +154,7 @@ export class MethodsVisitor {
   private getRequestOptions = (type?: OperationType) => {
     let isMutation = type && type === "mutation"
     return isMutation
-      ? `options?: { fetchPolicy?: MutationFetchPolicy }`
+      ? `options?: { fetchPolicy?: 'network-only' | 'no-cache' }`
       : `options?: { fetchPolicy?: FetchPolicy, ssr?: boolean }`
   }
 

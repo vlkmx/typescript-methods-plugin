@@ -43,7 +43,7 @@ var MethodsVisitor = /** @class */ (function () {
                 .concat(mutationsImports)
                 .concat(subscriptionsImports)
                 .reduce(function (acc, x) { return __spreadArray(__spreadArray([], acc), x); }, []);
-            return "\n      import { ApolloClient, NormalizedCacheObject, FetchPolicy, MutationFetchPolicy } from '@apollo/client';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
+            return "\n      import { ApolloClient, NormalizedCacheObject, FetchPolicy } from '@apollo/client';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
         };
         this.getBaseClass = function () {
             var queries = Array.from(_this.queries);
@@ -96,7 +96,7 @@ var MethodsVisitor = /** @class */ (function () {
         this.getRequestOptions = function (type) {
             var isMutation = type && type === "mutation";
             return isMutation
-                ? "options?: { fetchPolicy?: MutationFetchPolicy }"
+                ? "options?: { fetchPolicy?: 'network-only' | 'no-cache' }"
                 : "options?: { fetchPolicy?: FetchPolicy, ssr?: boolean }";
         };
         this.getOperationName = function (type) {
