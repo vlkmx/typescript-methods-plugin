@@ -97,7 +97,7 @@ var MethodsVisitor = /** @class */ (function () {
             var isMutation = type && type === "mutation";
             return isMutation
                 ? "options?: { fetchPolicy: 'network-only' | 'no-cache' }"
-                : "options?: { fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only' }";
+                : "options?: { fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only', ssr?: boolean }";
         };
         this.getOperationName = function (type) {
             if (type === "query") {
