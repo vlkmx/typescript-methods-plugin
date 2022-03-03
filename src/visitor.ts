@@ -155,7 +155,7 @@ export class MethodsVisitor {
     let isMutation = type && type === "mutation"
     return isMutation
       ? `options?: { fetchPolicy?: 'network-only' | 'no-cache' }`
-      : `options?: { fetchPolicy?: FetchPolicy, ssr?: boolean }`
+      : `options?: { fetchPolicy?: FetchPolicy }`
   }
 
   private getOperationName = (type: OperationType) => {
