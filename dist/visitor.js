@@ -96,8 +96,8 @@ var MethodsVisitor = /** @class */ (function () {
         this.getRequestOptions = function (type) {
             var isMutation = type && type === "mutation";
             return isMutation
-                ? "options?: { fetchPolicy: 'network-only' | 'no-cache' }"
-                : "options?: { fetchPolicy: 'network-only' | 'cache-first' | 'no-cache' | 'cache-only', ssr?: boolean }";
+                ? "options?: { fetchPolicy?: 'network-only' | 'no-cache' }"
+                : "options?: { fetchPolicy?: 'cache-and-network' | 'network-only' | 'cache-first' | 'no-cache' | 'cache-only', ssr?: boolean }";
         };
         this.getOperationName = function (type) {
             if (type === "query") {
