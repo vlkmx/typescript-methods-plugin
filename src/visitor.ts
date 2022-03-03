@@ -3,7 +3,7 @@ import { pascalCase } from "change-case-all"
 
 type OperationType = "query" | "mutation" | "subscription"
 export class MethodsVisitor {
-  private typeImportsPath = "./types.generated"
+  private typeImportsPath = "./generated"
   private mutations = new Set<{ name: string; hasVariables: boolean }>()
   private subscriptions = new Set<{ name: string; hasVariables: boolean }>()
   private queries = new Set<{ name: string; hasVariables: boolean }>()
