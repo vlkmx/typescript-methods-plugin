@@ -46,12 +46,59 @@ export class MethodsVisitor {
     let mutations = Array.from(this.mutations)
     let subscriptions = Array.from(this.subscriptions)
     let base = `
+  type StateFn<T> = (prevState: T) => T;
+  export type ClientStatus = 'connecting' | 'connecting-initial' | 'connected' | 'error';
+  export type WatchHandler<T> = (state: T, prevState: T) => void;
+  
+  export class Watcher {
+    private _watchers: WatchHandler<ClientStatus>[] = [];
+    private _state: ClientStatus;
+
+    constructor(initialState: ClientStatus) {
+      this._state = initialState;
+    }
+
+    watch(handler: WatchHandler<ClientStatus>, lazy: boolean = true): () => void {
+      this._watchers.push(handler);
+      if (!lazy) {
+          handler(this._state, this._state);
+      }
+      return () => {
+        let index = this._watchers.indexOf(handler);
+        if (index < 0) {
+            console.warn('Double unsubscribe detected!');
+        } else {
+            this._watchers.splice(index, 1);
+        }
+      };
+    }
+
+    getState() {
+      return this._state;
+    }
+
+    setState(state: ClientStatus | StateFn<ClientStatus>) {
+      let newState: ClientStatus;
+      if (typeof state === 'function') {
+          newState = (state as StateFn<ClientStatus>)(this._state);
+      } else {
+          newState = state;
+      }
+
+      for (let w of this._watchers) {
+          w(newState, this._state);
+      }
+      this._state = newState;
+    }
+  }
   export class GQLClient extends ApolloClient<NormalizedCacheObject>{
-    readonly statusWatcher: any;
+    readonly statusWatcher?: Watcher;
     
-    constructor(options: ApolloClientOptions<NormalizedCacheObject> & { statusWatcher: any }) {
+    constructor(options: ApolloClientOptions<NormalizedCacheObject> & { statusWatcher?: Watcher }) {
       super(options);
-      this.statusWatcher = options.statusWatcher
+      if (options.statusWatcher) {
+        this.statusWatcher = options.statusWatcher;
+      }
     }
     
     ${queries.map(this.toQuery).join("\n")}
