@@ -43,13 +43,13 @@ var MethodsVisitor = /** @class */ (function () {
                 .concat(mutationsImports)
                 .concat(subscriptionsImports)
                 .reduce(function (acc, x) { return __spreadArray(__spreadArray([], acc), x); }, []);
-            return "\n      import { ApolloClient, NormalizedCacheObject, FetchPolicy } from '@apollo/client';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
+            return "\n      import { ApolloClient, NormalizedCacheObject, FetchPolicy } from '@apollo/client';\n      import { ApolloClientOptions } from '@apollo/client/core/ApolloClient';\n      import {\n        " + imports.join(",\n") + "\n      } from '" + _this.typeImportsPath + "';\n\n      ";
         };
         this.getBaseClass = function () {
             var queries = Array.from(_this.queries);
             var mutations = Array.from(_this.mutations);
             var subscriptions = Array.from(_this.subscriptions);
-            var base = "\n  export class GQLClient extends ApolloClient<NormalizedCacheObject>{\n    " + queries.map(_this.toQuery).join("\n") + "\n    " + mutations.map(_this.toMutation).join("\n") + "\n    " + subscriptions.map(_this.toSubscription).join("\n") + "\n  }      \n      ";
+            var base = "\n  export class GQLClient extends ApolloClient<NormalizedCacheObject>{\n    readonly statusWatcher: any;\n    \n    constructor(options: ApolloClientOptions<NormalizedCacheObject> & { statusWatcher: any }) {\n      super(options);\n      this.statusWatcher = options.statusWatcher\n    }\n    \n    " + queries.map(_this.toQuery).join("\n") + "\n    " + mutations.map(_this.toMutation).join("\n") + "\n    " + subscriptions.map(_this.toSubscription).join("\n") + "\n  }      \n      ";
             return base;
         };
         this.toMutation = function (_a) {

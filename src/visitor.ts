@@ -34,6 +34,7 @@ export class MethodsVisitor {
 
     return `
       import { ApolloClient, NormalizedCacheObject, FetchPolicy } from '@apollo/client';
+      import { ApolloClientOptions } from '@apollo/client/core/ApolloClient';
       import {
         ${imports.join(",\n")}
       } from '${this.typeImportsPath}';\n
@@ -46,6 +47,13 @@ export class MethodsVisitor {
     let subscriptions = Array.from(this.subscriptions)
     let base = `
   export class GQLClient extends ApolloClient<NormalizedCacheObject>{
+    readonly statusWatcher: any;
+    
+    constructor(options: ApolloClientOptions<NormalizedCacheObject> & { statusWatcher: any }) {
+      super(options);
+      this.statusWatcher = options.statusWatcher
+    }
+    
     ${queries.map(this.toQuery).join("\n")}
     ${mutations.map(this.toMutation).join("\n")}
     ${subscriptions.map(this.toSubscription).join("\n")}
